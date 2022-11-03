@@ -2,11 +2,12 @@
 const display = document.querySelector('.display .main');
 const roundTo = 6;
 function updateDisplay() {
+	console.log(currentNum);
 	if(currentNum) {
-		if(Number.isInteger(currentNum)) {
-			display.textContent = currentNum;
+		if(currentNum.toString().includes('.') && currentNum.length > 1) {
+			display.textContent = Math.round((Number(currentNum) + Number.EPSILON) * Math.pow(10,roundTo)) / Math.pow(10,roundTo);
 		} else {
-			display.textContent = Math.round((currentNum + Number.EPSILON) * Math.pow(10,roundTo)) / Math.pow(10,roundTo);
+			display.textContent = currentNum;
 		}
 	} else {
 		display.textContent = 0;
@@ -18,21 +19,27 @@ function updateDisplay() {
 // numbers
 let currentNum = null;
 let tape = [];
-let dotWaiting = false;
+let decimalAllowed = true;
 const allDigitBtns = document.querySelectorAll('.digits button');
 allDigitBtns.forEach(btn => btn.addEventListener('click', doDigit))
 function doDigit(digit) {
 	if(digit.type === 'click') {
-		thisDigit = Number(this.dataset.digit);
+		thisDigit = this.dataset.digit;
 	} else {
 		thisDigit = digit;
 	}
+	if(thisDigit === '.' && decimalAllowed === false) {
+		return;
+	}
 	if(currentNum){
-		currentNum = (currentNum * 10) + thisDigit;
+		currentNum += thisDigit;
 		updateDisplay();
 	} else {
 		currentNum = thisDigit;
 		updateDisplay();
+	}
+	if(thisDigit === '.' && decimalAllowed === true) {
+		decimalAllowed = false;
 	}
 }
 
@@ -40,26 +47,26 @@ function doDigit(digit) {
 let currentOperation = null;
 function doAdd() {
 	currentNum = tape[tape.length-2] + tape[tape.length-1];
-	tape.push(currentNum);
+	tape.push(Number(currentNum));
 }
 function doSubtract() {
 	currentNum = tape[tape.length-2] - tape[tape.length-1];
-	tape.push(currentNum);
+	tape.push(Number(currentNum));
 }
 function doMultiply() {
 	currentNum = tape[tape.length-2] * tape[tape.length-1];
-	tape.push(currentNum);
+	tape.push(Number(currentNum));
 }
 function doDivide() {
 	if(tape[tape.length-1] === 0) {
 		display.textContent = 'oops! no div/0';
 	}
 	currentNum = tape[tape.length-2] / tape[tape.length-1];
-	tape.push(currentNum);
+	tape.push(Number(currentNum));
 }
 function doEquals() {
 	if(currentNum){
-		tape.push(currentNum);
+		tape.push(Number(currentNum));
 			switch (currentOperation) {
 			case 'add':
 				doAdd();
@@ -79,7 +86,8 @@ function doEquals() {
 		currentOperation = null;
 		updateDisplay();
 		currentNum = null;
-		allOperatorBtns.forEach(btn => btn.classList.remove('active'));
+		decimalAllowed = true;
+		checkForOperator();
 	}
 }
 function operate(operation) {
@@ -93,8 +101,9 @@ function operate(operation) {
 	} else {
 		if(!currentOperation) {
 			if(currentNum){
-				tape.push(currentNum);
+				tape.push(Number(currentNum));
 				currentNum = null;
+				decimalAllowed = true;
 				currentOperation = thisOperation;
 				checkForOperator();
 			} else if(tape[tape.length-1]) {
@@ -103,7 +112,7 @@ function operate(operation) {
 			}
 		} else if(currentOperation === thisOperation) {
 			if(currentNum){
-				tape.push(currentNum);
+				tape.push(Number(currentNum));
 				switch (thisOperation) {
 					case 'add':
 						doAdd();
@@ -120,9 +129,10 @@ function operate(operation) {
 				}
 				updateDisplay();
 				currentNum = null;
+				decimalAllowed = true;
 			}
 		} else {
-			tape.push(currentNum);
+			tape.push(Number(currentNum));
 			switch (currentOperation) {
 				case 'add':
 					doAdd();
@@ -140,6 +150,7 @@ function operate(operation) {
 			currentOperation = thisOperation;
 			updateDisplay();
 			currentNum = null;
+			decimalAllowed = true;
 		}
 	}
 }
@@ -171,6 +182,7 @@ function doAllClear() {
 	currentNum = null;
 	tape = [];
 	currentOperation = null;
+	decimalAllowed = true;
 	updateDisplay();
 }
 function doNegate() {
@@ -191,7 +203,7 @@ function doPercent() {
 }
 function doBackspace() {
 	if(currentNum) {
-		currentNum =  Math.floor(currentNum / 10);
+		currentNum = currentNum.slice(0, currentNum.length - 1) ;
 		updateDisplay();
 	}
 }
@@ -239,7 +251,7 @@ function doMemoryAdd() {
 			sessionStorage.setItem('mem', tape[tape.length-1]);
 		}
 	}
-	tape.push(currentNum);
+	tape.push(Number(currentNum));
 	updateDisplay()
 }
 function doMemorySubtract() {
@@ -256,13 +268,13 @@ function doMemorySubtract() {
 			sessionStorage.setItem('mem', tape[tape.length-1]);
 		}
 	}
-	tape.push(currentNum);
+	tape.push(Number(currentNum));
 	updateDisplay()
 }
 function doMemoryRecall() {
 	if(sessionStorage.getItem('mem')) {
-		currentNum = Number(sessionStorage.getItem('mem'));
-		tape.push(currentNum);
+		currentNum = sessionStorage.getItem('mem');
+		tape.push(Number(currentNum));
 		updateDisplay();
 	}
 }
@@ -294,10 +306,13 @@ allMemoryBtns.forEach(btn => {
 // keyboard
 document.addEventListener('keydown', function(event) {
 	if(Number(event.key) >= 0 && Number(event.key) <= 9) {
-		doDigit(Number(event.key));
-	} else if(event.key === 'Backspace') {
+		doDigit(event.key);
+	} else if(event.key === '.') {
+		doDigit(event.key);
+	}
+	 else if(event.key === 'Backspace') {
 		doBackspace();
-	} else if(event.key === '=') {
+	} else if(event.key === '=' || event.key === 'Enter') {
 		doEquals();
 	} else if(event.key === '-') {
 		operate('subtract');
