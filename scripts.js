@@ -2,7 +2,6 @@
 const display = document.querySelector('.display .main');
 const roundTo = 6;
 function updateDisplay() {
-	console.log(currentNum);
 	if(currentNum) {
 		if(currentNum.toString().includes('.') && currentNum.length > 1) {
 			display.textContent = Math.round((Number(currentNum) + Number.EPSILON) * Math.pow(10,roundTo)) / Math.pow(10,roundTo);
@@ -59,7 +58,8 @@ function doMultiply() {
 }
 function doDivide() {
 	if(tape[tape.length-1] === 0) {
-		display.textContent = 'oops! no div/0';
+		currentNum = 'no div/0!'
+		return;
 	}
 	currentNum = tape[tape.length-2] / tape[tape.length-1];
 	tape.push(Number(currentNum));
@@ -332,11 +332,3 @@ document.addEventListener('keydown', function(event) {
 
 // on load functions
 updateDisplay();
-
-
-// gotchas:
-	// Display a snarky error message if the user tries to divide by 0… and don’t let it crash your calculator!
-
-// extra credit:
-	// Users can get floating point numbers if they do the math required to get one, but they can’t type them in yet. Add a . button and let users input decimals! Make sure you don’t let them type more than one though: 12.3.56.5. It is hard to do math on these numbers. (disable the decimal button if there’s already one in the display)
-	// Add keyboard support! You might run into an issue where keys such as (/) might cause you some trouble. Read the MDN documentation for event.preventDefault to help solve this problem.
