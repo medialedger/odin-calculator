@@ -3,11 +3,7 @@ const display = document.querySelector('.display .main');
 const roundTo = 6;
 function updateDisplay() {
 	if(currentNum) {
-		if(currentNum.toString().includes('.') && currentNum.length > 1) {
-			display.textContent = Math.round((Number(currentNum) + Number.EPSILON) * Math.pow(10,roundTo)) / Math.pow(10,roundTo);
-		} else {
-			display.textContent = currentNum;
-		}
+		display.textContent = new Intl.NumberFormat().format(Math.round((Number(currentNum) + Number.EPSILON) * Math.pow(10,roundTo)) / Math.pow(10,roundTo));
 	} else {
 		display.textContent = 0;
 	}

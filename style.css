@@ -45,8 +45,12 @@ button {
 .utility .active {
 	opacity: 1;
 }
+.main-box {
+	max-width: 14em;
+	overflow-x: scroll;
+}
 .main {
-	font-size: 3em;
+	font-size: 2.6em;
 	text-align: right;
 }
 .functions {
