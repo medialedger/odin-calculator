@@ -319,8 +319,6 @@ document.addEventListener('keydown', function(event) {
 		operate('multiply');
 	} else if(event.key === '+') {
 		operate('add');
-	} else if(event.key === 'c') {
-		doAllClear();
 	} else if(event.key === '%') {
 		doPercent();
 	}
