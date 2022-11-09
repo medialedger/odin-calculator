@@ -3,7 +3,7 @@ const display = document.querySelector('.display .main');
 const roundTo = 6;
 function updateDisplay() {
 	if(currentNum) {
-		display.textContent = new Intl.NumberFormat().format(Math.round((Number(currentNum) + Number.EPSILON) * Math.pow(10,roundTo)) / Math.pow(10,roundTo));
+		display.textContent = currentNum;
 	} else {
 		display.textContent = 0;
 	}
@@ -38,6 +38,13 @@ function doDigit(digit) {
 	}
 }
 
+// round number
+function roundNum() {
+	if(currentNum.includes('.' && !currentNum.startWith('.'))) {
+		currentNum = display.textContent = new Intl.NumberFormat().format(Math.round((Number(currentNum) + Number.EPSILON) * Math.pow(10,roundTo)) / Math.pow(10,roundTo));
+	}
+}
+
 // operations
 let currentOperation = null;
 function doAdd() {
@@ -53,8 +60,8 @@ function doMultiply() {
 	tape.push(Number(currentNum));
 }
 function doDivide() {
-	if(tape[tape.length-1] === 0) {
-		currentNum = 'no div/0!'
+	if(tape[tape.length-1] == 0) {
+		currentNum = 'no div/0!';
 		return;
 	}
 	currentNum = tape[tape.length-2] / tape[tape.length-1];
@@ -80,6 +87,7 @@ function doEquals() {
 				break;
 		}
 		currentOperation = null;
+		roundNum();
 		updateDisplay();
 		currentNum = null;
 		decimalAllowed = true;
@@ -123,6 +131,7 @@ function operate(operation) {
 						doDivide();
 						break;
 				}
+				roundNum();
 				updateDisplay();
 				currentNum = null;
 				decimalAllowed = true;
@@ -144,6 +153,7 @@ function operate(operation) {
 					break;
 			}
 			currentOperation = thisOperation;
+			roundNum();
 			updateDisplay();
 			currentNum = null;
 			decimalAllowed = true;
